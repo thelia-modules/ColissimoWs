@@ -18,7 +18,7 @@ Si vous utilisez la facture par défaut, pensez-bien à faire les "traductions" 
 
 ### Manually
 
-* Copy the module into ```<thelia_root>/local/modules/``` directory and be sure that the name of the module is ProcessAndInvoice.
+* Copy the module into ```<thelia_root>/local/modules/``` directory and be sure that the name of the module is ColissimoWs.
 * Activate it in your Thelia administration panel
 
 ### Composer
