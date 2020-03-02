@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<database defaultIdMethod="native" name="thelia"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="../../../../core/vendor/propel/propel/resources/xsd/database.xsd" >
+
+    <table name="colissimows_label" namespace="ColissimoWs\Model">
+        <column autoIncrement="true" name="id" primaryKey="true" required="true" type="INTEGER" />
+        <column name="order_id" type="INTEGER" required="true"/>
+        <column name="order_ref" type="VARCHAR" size="255" required="true"/>
+        <column name="error" type="BOOLEAN" required="true" default="0" />
+        <column name="error_message" type="VARCHAR" size="255" default="" />
+        <column name="tracking_number" type="VARCHAR" size="64" default="" />
+        <column name="label_data" type="CLOB" />
+        <column name="label_type" type="VARCHAR" size="4" />
+        <column name="weight" type="float" required="true" />
+        <column name="signed" type="BOOLEAN" default="0"/>
+        <column name="with_customs_invoice" type="BOOLEAN" required="true" default="0" />
+
+        <foreign-key foreignTable="order" name="fk_colissimows_label_order" onDelete="CASCADE" onUpdate="RESTRICT">
+            <reference foreign="id" local="order_id" />
+        </foreign-key>
+
+        <behavior name="timestampable" />
+    </table>
+
+    <table name="colissimows_price_slices" namespace="ColissimoWs\Model">
+        <column autoIncrement="true" name="id" primaryKey="true" required="true" type="INTEGER" />
+        <column name="area_id" type="INTEGER" required="true"/>
+        <column name="max_weight" type="FLOAT"/>
+        <column name="max_price" type="FLOAT"/>
+        <column name="shipping" type="FLOAT" required="true"/>
+        <column name="franco_min_price" type="FLOAT" />
+
+        <foreign-key foreignTable="area" name="fk_colissimows_price_slices_area_id" onDelete="RESTRICT" onUpdate="RESTRICT">
+            <reference foreign="id" local="area_id" />
+        </foreign-key>
+    </table>
+
+    <table name="colissimows_freeshipping" namespace="ColissimoWs\Model">
+        <column name="id" primaryKey="true" required="true" type="INTEGER" />
+        <column name="active" type="BOOLEAN" default="0"/>
+    </table>
+
+    <external-schema filename="local/config/schema.xml" referenceOnly="true" />
+</database>

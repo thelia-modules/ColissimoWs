@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<config xmlns="http://thelia.net/schema/dic/config"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://thelia.net/schema/dic/config http://thelia.net/schema/dic/config/thelia-1.0.xsd">
+
+    <loops>
+        <loop name="colissimows.orders-not-sent" class="ColissimoWs\Loop\OrdersNotYetSentLoop" />
+        <loop name="colissimows.label-info" class="ColissimoWs\Loop\ColissimoWsLabelInfo" />
+        <loop name="colissimows.price-slices" class="ColissimoWs\Loop\PriceSlicesLoop" />
+        <loop name="colissimows.freeshipping" class="ColissimoWs\Loop\ColissimoWsFreeShippingLoop" />
+    </loops>
+
+    <forms>
+        <form name="colissimows_configuration_form" class="ColissimoWs\Form\ConfigurationForm" />
+        <form name="colissimows_export_form" class="ColissimoWs\Form\LabelGenerationForm" />
+        <form name="colissimows.freeshipping.form" class="ColissimoWs\Form\FreeShippingForm" />
+    </forms>
+
+    <services>
+        <service id="colissimows.label_generator" class="ColissimoWs\EventListeners\ShippingLabelGenerator">
+            <argument type="service" id="request_stack" />
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <service id="colissimows.notification_mail" class="ColissimoWs\EventListeners\ShippingNotificationSender">
+            <argument type="service" id="thelia.parser" />
+            <argument type="service" id="mailer"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+    </services>
+
+    <hooks>
+        <hook id="colissimows.hooks" class="ColissimoWs\Hook\HookManager">
+            <tag name="hook.event_listener" event="module.configuration" type="back" method="onModuleConfigure" />
+            <tag name="hook.event_listener" event="main.top-menu-tools" type="back" method="onMainTopMenuTools" />
+            <tag name="hook.event_listener" event="module.config-js" type="back" method="onModuleConfigJs" />
+        </hook>
+    </hooks>
+</config>

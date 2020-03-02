@@ -1,0 +1,13 @@
+{
+  "name": "thelia/colissimows-module",
+  "license": "LGPL-3.0-or-later",
+  "type": "thelia-module",
+  "require": {
+    "thelia/installer": "~1.1",
+    "wsdltophp/package-colissimo-postage": "~1.0.0",
+    "giggsey/libphonenumber-for-php": "^8.11"
+  },
+  "extra": {
+    "installer-name": "ColissimoWs"
+  }
+}
