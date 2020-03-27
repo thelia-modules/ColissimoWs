@@ -40,7 +40,8 @@ class ColissimoWsFreeShippingLoop extends BaseLoop implements PropelSearchLoopIn
         /** @var \ColissimoWs\Model\ColissimowsFreeshipping $freeshipping */
         foreach ($loopResult->getResultDataCollection() as $freeshipping) {
             $loopResultRow = new LoopResultRow($freeshipping);
-            $loopResultRow->set("FREESHIPPING_ACTIVE", $freeshipping->getActive());
+            $loopResultRow
+                ->set("FREESHIPPING_ACTIVE", $freeshipping->getActive());
             $loopResult->addRow($loopResultRow);
         }
         return $loopResult;

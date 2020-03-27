@@ -3,6 +3,34 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:noNamespaceSchemaLocation="../../../../core/vendor/propel/propel/resources/xsd/database.xsd" >
 
+    <table name="colissimows_price_slices" namespace="ColissimoWs\Model">
+        <column autoIncrement="true" name="id" primaryKey="true" required="true" type="INTEGER" />
+        <column name="area_id" type="INTEGER" required="true"/>
+        <column name="max_weight" type="FLOAT"/>
+        <column name="max_price" type="FLOAT"/>
+        <column name="shipping" type="FLOAT" required="true"/>
+
+        <foreign-key foreignTable="area" name="fk_colissimows_price_slices_area_id" onDelete="RESTRICT" onUpdate="RESTRICT">
+            <reference foreign="id" local="area_id" />
+        </foreign-key>
+    </table>
+
+    <table name="colissimows_freeshipping" namespace="ColissimoWs\Model">
+        <column name="id" primaryKey="true" required="true" type="INTEGER" />
+        <column name="active" type="BOOLEAN" default="0"/>
+        <column name="freeshipping_from" size="18" scale="2" type="DECIMAL" />
+    </table>
+
+    <table name="colissimows_area_freeshipping" namespace="ColissimoWs\Model">
+        <column name="id" primaryKey="true" required="true" type="INTEGER" />
+        <column name="area_id" required="true" type="INTEGER" />
+        <column name="cart_amount" defaultValue="0.00" size="18" scale="2" type="DECIMAL" />
+        <foreign-key foreignTable="area" name="fk_colissimows_area_freeshipping_area_id" onDelete="RESTRICT" onUpdate="RESTRICT">
+            <reference foreign="id" local="area_id" />
+        </foreign-key>
+    </table>
+
+    <!-- We need to keep this for compatibility reasons with older versions : the models are needed -->
     <table name="colissimows_label" namespace="ColissimoWs\Model">
         <column autoIncrement="true" name="id" primaryKey="true" required="true" type="INTEGER" />
         <column name="order_id" type="INTEGER" required="true"/>
@@ -21,24 +49,6 @@
         </foreign-key>
 
         <behavior name="timestampable" />
-    </table>
-
-    <table name="colissimows_price_slices" namespace="ColissimoWs\Model">
-        <column autoIncrement="true" name="id" primaryKey="true" required="true" type="INTEGER" />
-        <column name="area_id" type="INTEGER" required="true"/>
-        <column name="max_weight" type="FLOAT"/>
-        <column name="max_price" type="FLOAT"/>
-        <column name="shipping" type="FLOAT" required="true"/>
-        <column name="franco_min_price" type="FLOAT" />
-
-        <foreign-key foreignTable="area" name="fk_colissimows_price_slices_area_id" onDelete="RESTRICT" onUpdate="RESTRICT">
-            <reference foreign="id" local="area_id" />
-        </foreign-key>
-    </table>
-
-    <table name="colissimows_freeshipping" namespace="ColissimoWs\Model">
-        <column name="id" primaryKey="true" required="true" type="INTEGER" />
-        <column name="active" type="BOOLEAN" default="0"/>
     </table>
 
     <external-schema filename="local/config/schema.xml" referenceOnly="true" />

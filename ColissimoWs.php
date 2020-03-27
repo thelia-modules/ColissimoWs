@@ -12,24 +12,22 @@
 
 namespace ColissimoWs;
 
+use ColissimoWs\Model\ColissimowsAreaFreeshippingQuery;
 use ColissimoWs\Model\ColissimowsFreeshippingQuery;
 use ColissimoWs\Model\ColissimowsPriceSlices;
 use PDO;
-use ColissimoWs\Model\ColissimowsLabelQuery;
 use ColissimoWs\Model\ColissimowsPriceSlicesQuery;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Propel;
-use SoColissimo\Model\SocolissimoDeliveryModeQuery;
+use Symfony\Component\Finder\Finder;
+use Thelia\Install\Database;
 use Thelia\Model\ConfigQuery;
 use Thelia\Model\Country;
 use Thelia\Model\Message;
 use Thelia\Model\MessageQuery;
 use Thelia\Model\ModuleQuery;
-use Thelia\Model\Order;
 use Thelia\Module\AbstractDeliveryModule;
-use Thelia\Module\BaseModule;
-use Thelia\Module\DeliveryModuleInterface;
 use Thelia\Module\Exception\DeliveryException;
 
 class ColissimoWs extends AbstractDeliveryModule
@@ -40,25 +38,11 @@ class ColissimoWs extends AbstractDeliveryModule
     // The shipping confirmation message identifier
     const CONFIRMATION_MESSAGE_NAME = 'order_confirmation_colissimows';
 
-    // Events
-    const GENERATE_LABEL_EVENT = 'colissimows.generate_label_event';
-    const CLEAR_LABEL_EVENT = 'colissimows.clear_label_event';
-
     // Configuration parameters
     const COLISSIMO_USERNAME = 'colissimo_username';
     const COLISSIMO_PASSWORD = 'colissimo_password';
     const AFFRANCHISSEMENT_ENDPOINT_URL = 'affranchissement_endpoint_url';
-    const FORMAT_ETIQUETTE = 'format_etiquette';
     const ACTIVATE_DETAILED_DEBUG = 'activate_detailed_debug';
-
-    const FROM_NAME = 'company_name';
-    const FROM_ADDRESS_1 = 'from_address_1';
-    const FROM_ADDRESS_2 = 'from_address_2';
-    const FROM_CITY = 'from_city';
-    const FROM_ZIPCODE = 'from_zipcode';
-    const FROM_COUNTRY = 'from_country';
-    const FROM_CONTACT_EMAIL = 'from_contact_email';
-    const FROM_PHONE = 'from_phone';
 
     /**
      * @param ConnectionInterface|null $con
@@ -68,21 +52,16 @@ class ColissimoWs extends AbstractDeliveryModule
     {
         // Create table if required.
         try {
-            ColissimowsLabelQuery::create()->findOne();
+            ColissimowsPriceSlicesQuery::create()->findOne();
+            ColissimowsFreeshippingQuery::create()->findOne();
+            ColissimowsAreaFreeshippingQuery::create()->findOne();
         } catch (\Exception $ex) {
-            $database = new \Thelia\Install\Database($con->getWrappedConnection());
+            $database = new Database($con->getWrappedConnection());
             $database->insertSql(null, [__DIR__ . "/Config/thelia.sql"]);
 
-            self::setConfigValue(self::AFFRANCHISSEMENT_ENDPOINT_URL, 'https://ws.colissimo.fr/sls-ws/SlsServiceWS?wsdl');
-
-            self::setConfigValue(ColissimoWs::FROM_NAME, ConfigQuery::getStoreName());
-            self::setConfigValue(ColissimoWs::FROM_ADDRESS_1, ConfigQuery::read('store_address1'));
-            self::setConfigValue(ColissimoWs::FROM_ADDRESS_2, ConfigQuery::read('store_address2'));
-            self::setConfigValue(ColissimoWs::FROM_CITY, ConfigQuery::read('store_city'));
-            self::setConfigValue(ColissimoWs::FROM_ZIPCODE, ConfigQuery::read('store_zipcode'));
-            self::setConfigValue(ColissimoWs::FROM_CONTACT_EMAIL, ConfigQuery::read('store_email'));
-            self::setConfigValue(ColissimoWs::FROM_COUNTRY, Country::getShopLocation()->getIsoalpha2());
-            self::setConfigValue(ColissimoWs::FROM_PHONE, ConfigQuery::read('store_phone'));
+            if (!self::getConfigValue(self::AFFRANCHISSEMENT_ENDPOINT_URL)) {
+                self::setConfigValue(self::AFFRANCHISSEMENT_ENDPOINT_URL, 'https://ws.colissimo.fr/sls-ws/SlsServiceWS?wsdl');
+            }
         }
 
         if (null === MessageQuery::create()->findOneByName(self::CONFIRMATION_MESSAGE_NAME)) {
@@ -103,13 +82,32 @@ class ColissimoWs extends AbstractDeliveryModule
                 ->save()
             ;
         }
-
-
     }
 
-    public static function getLabelFileType()
+    /**
+     * @inheritDoc
+     */
+    public function update($currentVersion, $newVersion, ConnectionInterface $con = null)
     {
-        return strtolower(substr(ColissimoWs::getConfigValue(ColissimoWs::FORMAT_ETIQUETTE, 'PDF'), 0, 3));
+        $finder = (new Finder)
+            ->files()
+            ->name('#.*?\.sql#')
+            ->sortByName()
+            ->in(__DIR__ . DS . 'Config' . DS . 'update');
+
+        $database = new Database($con);
+
+        /** @var \Symfony\Component\Finder\SplFileInfo $updateSQLFile */
+        foreach ($finder as $updateSQLFile) {
+            if (version_compare($currentVersion, str_replace('.sql', '', $updateSQLFile->getFilename()), '<')) {
+                $database->insertSql(
+                    null,
+                    [
+                        $updateSQLFile->getPathname()
+                    ]
+                );
+            }
+        }
     }
 
     /**
@@ -121,9 +119,9 @@ class ColissimoWs extends AbstractDeliveryModule
     {
         $areaArray = [];
 
-        $sql = "SELECT ca.area_id as area_id FROM country_area ca
+        $sql = 'SELECT ca.area_id as area_id FROM country_area ca
                INNER JOIN area_delivery_module adm ON (ca.area_id = adm.area_id AND adm.delivery_module_id = :p0)
-               WHERE ca.country_id = :p1";
+               WHERE ca.country_id = :p1';
 
         $con = Propel::getConnection();
 
@@ -150,48 +148,43 @@ class ColissimoWs extends AbstractDeliveryModule
      */
     public static function getPostageAmount($areaId, $weight, $cartAmount = 0)
     {
-        //@TODO : Handle Freeshipping (button activation sets a variable in module config ?)
-        //$freeshipping = getFreeshippingActive();
-        $freeshipping = false;
+        $freeshippingFrom = ColissimowsFreeshippingQuery::create()->findOneById(1)->getFreeshippingFrom();
+        $areaFreeshipping = ColissimowsAreaFreeshippingQuery::create()->findOneByAreaId($areaId);
 
-        //@TODO : Handle FreeshippingFrom
-        //$freeshippingFrom = getFreeshippingFrom();
-        $freeshippingFrom = null;
+        $areaPrices = ColissimowsPriceSlicesQuery::create()
+            ->filterByAreaId($areaId)
+            ->filterByMaxWeight($weight, Criteria::GREATER_EQUAL)
+            ->_or()
+            ->filterByMaxWeight(null)
+            ->filterByMaxPrice($cartAmount, Criteria::GREATER_EQUAL)
+            ->_or()
+            ->filterByMaxPrice(null)
+            ->orderByMaxWeight()
+            ->orderByMaxPrice()
+        ;
 
-        //@TODO : Handle FreeShippingByArea (needs a dedicated function and probably a dedicated table too)
+        /** @var ColissimowsPriceSlices $firstPrice */
+        $firstPrice = $areaPrices->find()
+            ->getFirst();
 
-
-        $postage = 0;
-
-        if (!$freeshipping) {
-            $areaPrices = ColissimowsPriceSlicesQuery::create()
-                ->filterByAreaId($areaId)
-                ->filterByMaxWeight($weight, Criteria::GREATER_EQUAL)
-                ->_or()
-                ->filterByMaxWeight(null)
-                ->filterByMaxPrice($cartAmount, Criteria::GREATER_EQUAL)
-                ->_or()
-                ->filterByMaxPrice(null)
-                ->orderByMaxWeight()
-                ->orderByMaxPrice()
-            ;
-
-            /** @var ColissimowsPriceSlices $firstPrice */
-            $firstPrice = $areaPrices->find()
-                ->getFirst();
-
-            if (null === $firstPrice) {
-                throw new DeliveryException("Colissimo delivery unavailable for your cart weight or delivery country");
-            }
-
-            //If a min price for freeshipping is defined and the cart amount reaches this value, return 0 (aka free shipping)
-            if (null !== $freeshippingFrom && $freeshippingFrom <= $cartAmount) {
-                $postage = 0;
-                return $postage;
-            }
-
-            $postage = $firstPrice->getShipping();
+        if (null === $firstPrice) {
+            throw new DeliveryException("Colissimo delivery unavailable for your cart weight or delivery country");
         }
+
+        /** If a min price for freeshippingFrom is defined and the cart amount reaches this value, return 0 (aka free shipping) */
+        if (null !== $freeshippingFrom && $freeshippingFrom <= $cartAmount) {
+            $postage = 0;
+            return $postage;
+        }
+
+        /** If a min price for areaFreeshipping is defined and the cart amount reaches this value, return 0 (aka free shipping) */
+        if (null !== $areaFreeshipping && $areaFreeshipping <= $cartAmount) {
+            $postage = 0;
+            return $postage;
+        }
+
+        $postage = $firstPrice->getShipping();
+
         return $postage;
     }
 
@@ -266,68 +259,11 @@ class ColissimoWs extends AbstractDeliveryModule
             ->filterByAreaId($areaId)
             ->findOne();
 
-
-
         /* check if Colissimo delivers the asked area*/
         if (null !== $prices) {
             return true;
         }
         return false;
-    }
-
-    public static function canOrderBeNotSigned(Order $order)
-    {
-        $areas = $order->getOrderAddressRelatedByDeliveryOrderAddressId()->getCountry()->getAreas();
-
-        $areas_id = [];
-
-        foreach ($areas as $area){
-            $areas_id[] = $area->getId();
-        }
-
-        if (in_array(4, $areas_id) || in_array(5, $areas_id)) // If order's country isn't in Europe or in DOM-TOM so order has to be signed
-            return false;
-        else
-            return true;
-    }
-
-    /**
-     * @param Order $order
-     * @return string
-     * Get the area code for order (used to generate colissimoWs label with or without signature)
-     * Codes :
-     *      - FR : France
-     *      - DT : Dom-Tom
-     *      - EU : Europe
-     *      - WO : World
-     * @throws \Propel\Runtime\Exception\PropelException
-     */
-    public static function getOrderShippingArea(Order $order){
-        $areas = $order->getOrderAddressRelatedByDeliveryOrderAddressId()->getCountry()->getAreas();
-
-        $areas_id = [];
-
-        foreach ($areas as $area){
-            $areas_id[] = $area->getId();
-        }
-
-        if (in_array(1, $areas_id)){
-            return 'FR';
-        }
-
-        if (in_array(2, $areas_id) || in_array(3, $areas_id)){
-            return 'EU';
-        }
-
-        if (in_array(4, $areas_id) || in_array(5, $areas_id)){
-            return 'WO';
-        }
-
-        if (in_array(6, $areas_id)){
-            return 'DT';
-        }
-
-        return null;
     }
 
     public static function getModCode()

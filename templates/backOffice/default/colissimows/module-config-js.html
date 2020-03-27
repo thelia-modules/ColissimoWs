@@ -138,8 +138,23 @@
                 data: form.serialize(),
             }).done(function(){
                 $("#loading-event").remove();
-            })
-            .fail(function(jqXHR, textStatus, errorThrown){
+            }).fail(function(jqXHR, textStatus, errorThrown){
+                $('#freeshipping-failed-body').html(jqXHR.responseJSON.error);
+                $("#freeshipping-failed").modal("show");
+            });
+
+        });
+
+        $("#freeshippingform").submit(function(e, data){
+            var form = $("#freeshippingform");
+            $('body').append('<div class="modal-backdrop fade in" id="loading-event"><div class="loading"></div></div>');
+            $.ajax({
+                url: form.attr('action'),
+                type: form.attr('method'),
+                data: form.serialize(),
+            }).done(function(){
+                $("#loading-event").remove();
+            }).fail(function(jqXHR, textStatus, errorThrown){
                 $('#freeshipping-failed-body').html(jqXHR.responseJSON.error);
                 $("#freeshipping-failed").modal("show");
             });
@@ -147,7 +162,5 @@
         });
 
     });
-
-
 
 </script>

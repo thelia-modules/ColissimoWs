@@ -1,195 +1,27 @@
 {if isset($smarty.get.tab)}
 {$tab=$smarty.get.tab}
 {else}
-{$tab='labels'}
+{$tab='prices-dom'}
 {/if}
-
+<style>
+    input[type=number]
+    {
+        min-width:100px;
+    }
+</style>
 <div class="row">
     <div class="col-md-12">
         <div class="general-block-decorator">
             <div class="row">
                 <div class="col-md-12">
                     <ul id="tabbed-menu" class="nav nav-tabs">
-                        <li class="{if $tab eq "labels"}active{/if}"><a data-toggle="tab" href="#labels">{intl l="Shipping labels" d='colissimows.bo.default'}</a> </li>
                         <li class="{if $tab eq "prices-dom"}active{/if}"><a data-toggle="tab" href="#prices-dom">{intl l="Price slices (Dom)" d='colissimows.bo.default'}</a> </li>
                         <li class="{if $tab eq "config"}active{/if}"><a data-toggle="tab" href="#config">{intl l="Configuration" d='colissimows.bo.default'}</a> </li>
                     </ul>
 
                     <div class="tab-content">
+                        <!-- I have no idea why but I can't delete this without breaking the page -->
                         <div id="labels" class="tab-pane {if $tab eq "labels"}active{/if} form-container">
-                            <br>
-                            <div class="title">
-                                {intl l="Download and print Colissimo labels for not sent orders" d='colissimows.bo.default'}
-                            </div>
-
-                            {form name="colissimows_export_form"}
-                            {if $form_error}<div class="alert alert-danger">{$form_error_message}</div>{/if}
-
-                            <form action="{url path='/admin/module/colissimows/export'}" id="export-form" method="post">
-                                {form_hidden_fields}
-                                <div class="panel panel-default">
-                                    <div class="panel-heading clearfix">
-                                        {intl d='colissimows.bo.default' l="Order status change after processing"}
-                                    </div>
-
-                                    <div class="panel-body">
-                                        {form_field field="new_status"}
-                                        <div class="radio">
-                                            <label>
-                                                <input type="radio" name="{$name}" value="nochange" {if $data == "nochange"}checked{/if}>
-                                                {intl l="Do not change" d='colissimows.bo.default'}
-                                            </label>
-                                        </div>
-                                        <div class="radio">
-                                            <label>
-                                                <input type="radio" name="{$name}" value="processing" {if $data == "processing"}checked{/if}>
-                                                {intl l="Change to \"Processing\"" d='colissimows.bo.default'}
-                                            </label>
-                                        </div>
-                                        <div class="radio">
-                                            <label>
-                                                <input type="radio" name="{$name}" value="sent" {if $data == "sent"}checked{/if}>
-                                                {intl l="Change to \"Sent\". If you choose this option, the delivery notification email is sent to the customer, and the processed order are removed from this page." d='colissimows.bo.default'}
-                                            </label>
-                                        </div>
-                                        {/form_field}
-                                    </div>
-                                </div>
-
-                                <table class="table table-condensed">
-                                    <thead>
-                                    <tr class="active">
-                                        <th>
-                                            {intl d='colissimows.bo.default' l="REF"}
-                                        </th>
-                                        <th class="text-center">
-                                            {intl d='colissimows.bo.default' l="Order date"}
-                                        </th>
-                                        <th>
-                                            {intl d='colissimows.bo.default' l="Destination"}
-                                        </th>
-                                        <th class="text-center">
-                                            {intl d='colissimows.bo.default' l="Weight"}
-                                        </th>
-                                        <th class="text-center">
-                                            {intl d='colissimows.bo.default' l="Price (with taxes)"}
-                                        </th>
-                                        <th class="text-center">
-                                            {intl d='colissimows.bo.default' l="Signature"}
-                                        </th>
-                                        <th class="text-center">
-                                            {intl d='colissimows.bo.default' l="Tracking"}
-                                        </th>
-                                        <th class="text-center">
-                                            {intl d='colissimows.bo.default' l="Label"}
-                                        </th>
-                                        <th class="text-center">
-                                            {intl d='colissimows.bo.default' l="Customs invoice"}
-                                        </th>
-                                        <th class="text-center">
-                                            {intl l="Sel." d='colissimows.bo.default'}
-                                        </th>
-                                    </tr>
-                                    </thead>
-
-                                    <tr>
-                                        {loop name="orders.not.sent" type="colissimows.orders-not-sent"}
-                                        {loop type="colissimows.label-info" name="label-info" order_id=$ID}
-
-                                    <tr id="order-{$ORDER_ID}"{if $HAS_ERROR} class="bg-warning"{/if}>
-                                    <td>
-                                        <a href="{url path="/admin/order/update/%id" id=$ID tab='bill'}" target="_blank">{$REF}</a>
-                                    </td>
-                                    <td class="text-center">
-                                        {format_date date=$CREATE_DATE}
-                                    </td>
-                                    <td>
-                                        {loop type='order_address' name='colissimows.address' backend_context=1 id=$DELIVERY_ADDRESS}
-                                        {$CITY|strtoupper} {$ZIPCODE|strtoupper}, {loop backend_context=1 type="country" name="adrctry" id=$COUNTRY}{$TITLE|strtoupper}{/loop}
-                                        {/loop}
-                                    </td>
-                                    <td class="text-center">
-                                        {form_field field="weight" value_key=$ORDER_ID}
-                                        <div class="input-group">
-                                            <input class="form-control input-sm" type="text" name="{$name}" value="{$WEIGHT}" >
-                                            <span class="input-group-addon">{intl l="kg" d='colissimows.bo.default'}</span>
-                                        </div>
-                                        {/form_field}
-                                    </td>
-                                    <td class="text-center">
-                                        {$TOTAL_TAXED_AMOUNT|string_format:"%.2f"}
-                                    </td>
-                                    <td class="text-center">
-                                        {form_field field="signed" value_key=$ORDER_ID}
-                                        <input class="form-control order_checkbox" type="checkbox" name="{$name}" {if $SIGNED} checked {/if} {if !$CAN_BE_NOT_SIGNED} disabled {/if}>
-                                        {/form_field}
-                                    </td>
-                                    <td class="text-center">
-                                        {if $TRACKING_NUMBER}
-                                        <a href="https://www.colissimo.fr/portail_colissimo/suivreResultat.do?parcelnumber={$TRACKING_NUMBER}">{$TRACKING_NUMBER}</a>
-                                        {else}
-                                        <i title="{intl l="Non disponible" d='colissimows.bo.default'}" class="glyphicon glyphicon-ban-circle"></i>
-                                        {/if}
-                                    </td>
-
-                                    <td class="text-center">
-                                        {if $HAS_LABEL}
-                                        <a class="btn btn-default btn-xs" href="{$LABEL_URL}" target="_blank" title="{intl d='colissimows.bo.default' l="Download label (%fmt)" fmt=$LABEL_TYPE|upper}">
-                                        <i class="glyphicon glyphicon-download-alt"></i>
-                                        </a>
-                                        {else}
-                                        <i title="{intl l="Non disponible" d='colissimows.bo.default'}" class="glyphicon glyphicon-ban-circle"></i>
-                                        {/if}
-                                    </td>
-
-                                    <td class="text-center">
-                                        {if $HAS_CUSTOMS_INVOICE}
-                                        <a class="btn btn-default btn-xs" href="{$CUSTOMS_INVOICE_URL}" target="_blank" title="{intl d='colissimows.bo.default' l="Download customs invoice (PDF)"}">
-                                        <i class="glyphicon glyphicon-download"></i>
-                                        </a>
-                                        {else}
-                                        -
-                                        {/if}
-                                    </td>
-
-                                    <td class="text-center">
-                                        {if !$HAS_LABEL}
-                                        {form_field field="order_id" value_key=$ORDER_ID}
-                                        <input type="checkbox" name="{$name}" value="{$ORDER_ID}" class="form-control order_checkbox">
-                                        {/form_field}
-                                        {else}
-                                        <a onclick="return confirm('{intl l="Do you want to clear label and tracking number for this order ?"}')" href="{url path='/admin/module/colissimows/label/clear/%orderId' orderId=$ORDER_ID}" class="btn btn-danger btn-xs" title="{intl l='Clear label'}">
-                                        <i class="glyphicon glyphicon-trash"></i>
-                                        </a>
-                                        {/if}
-                                    </td>
-                                    </tr>
-
-                                    {if $HAS_ERROR}
-                                    <tr class="bg-warning">
-                                        <td colspan="99" style="padding-top:0;border:none">
-                                            <i class="glyphicon glyphicon-warning-sign"></i> {intl l="Label cannot be created. Error is: " d='colissimows.bo.default'}
-                                            {$ERROR_MESSAGE nofilter}
-                                        </td>
-                                    </tr>
-                                    {/if}
-
-                                    {/loop}
-                                    {/loop}
-                                    </tbody>
-                                </table>
-
-                                {elseloop rel="orders.not.sent"}
-                                <div class="alert alert-info">{intl d='colissimows.bo.default' l="There are currently no orders to ship with Colissimo"}</div>
-                                {/elseloop}
-
-                                {ifloop rel="orders.not.sent"}
-                                <div class="pull-right">
-                                    <button type="submit" value="stay" class="btn btn-primary" title="{intl l='Process selected orders' d='colissimows.bo.default'}">{intl l='Process selected orders' d='colissimows.bo.default'}</button>
-                                </div>
-                                {/ifloop}
-                            </form>
-                        {/form}
                     </div>
 
                     <div id="config" class="tab-pane {if $tab eq "config"}active{/if} form-container">
@@ -231,55 +63,14 @@
 
                                         <div class="col-md-6">
                                             {render_form_field field="affranchissement_endpoint_url" value=$affranchissement_endpoint_url}
-                                            {render_form_field field="format_etiquette" value=$format_etiquette}
                                             {render_form_field field="activate_detailed_debug" value=$activate_detailed_debug}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="panel panel-default">
-                                <div class="panel-heading">
-                                    <div class="panel-title">{intl d='colissimows.bo.default' l="Coordonnées de d'expéditeur"}</div>
-                                </div>
-                                <div class="panel-body">
-                                    <div class="row">
-                                        <div class="col-md-4">
-                                            {render_form_field field="company_name" value=$company_name}
-                                        </div>
-                                        <div class="col-md-4">
-                                            {render_form_field field="from_contact_email" value=$from_contact_email}
-                                        </div>
-                                        <div class="col-md-4">
-                                            {render_form_field field="from_phone" value=$from_phone}
-                                        </div>
-                                        <div class="col-md-6">
-                                            {render_form_field field="from_address_1" value=$from_address_1}
-                                        </div>
-                                        <div class="col-md-6">
-                                            {render_form_field field="from_address_2" value=$from_address_2}
-                                        </div>
-                                        <div class="col-md-2">
-                                            {render_form_field field="from_zipcode" value=$from_zipcode}
-                                        </div>
-                                        <div class="col-md-5">
-                                            {render_form_field field="from_city" value=$from_city}
-                                        </div>
-                                        <div class="col-md-5">
-                                            {custom_render_form_field form=$form field="from_country"}
-                                            <select {form_field_attributes field="from_country"}>
-                                                {loop type="country" name="strore_country" backend_context="true"}
-                                                {$isocode = $ISOALPHA2|strtoupper}
-                                                <option value="{$isocode}"{if $isocode == $from_country} selected{/if}>{$TITLE} ({$isocode})</option>
-                                                {/loop}
-                                            </select>
-                                            {/custom_render_form_field}
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </form>
                     {/form}
+
                 </div>
 
                 <div id="prices-dom" class="tab-pane {if $tab eq "prices-dom"}active{/if} form-container">
@@ -291,30 +82,38 @@
                     <!-- ********* FREE SHIPPING BUTTON ********* -->
 
                     <div class="row">
-                        <div class="col-md-4">
-                            <!-- checkbox free shipping -->
-                            {assign var="ColissimoWsFreeShipping" value=0}
-                            {form  name="colissimows.freeshipping.form"}
-
-                            <form action='{url path="/admin/module/colissimows/freeshipping"}' method="post" id="freeshippingform">
+                        <!-- checkbox free shipping -->
+                        {assign var="ColissimoWsFreeShipping" value=0}
+                        {form  name="colissimows.freeshipping.form"}
+                        <form action='{url path="/admin/module/colissimows/freeshipping"}' method="post" id="freeshippingform">
+                            <div class="col-md-4">
                                 {form_hidden_fields form=$form}
                                 {form_field form=$form field="freeshipping"}
-
                                 <label>
                                     {intl l="Activate total free shipping " d="colissimows.bo.default"}
                                 </label>
-
                                 <div class="switch-small freeshipping-activation-ColissimoWs" data-on="success" data-off="danger" data-on-label="<i class='glyphicon glyphicon-ok-circle'></i>" data-off-label="<i class='glyphicon glyphicon-remove-circle'></i>">
                                     {loop type="colissimows.freeshipping" name="freeshipping_colissimows"}
                                     <input type="checkbox" name="{$name}" value="true" {if $FREESHIPPING_ACTIVE}checked{assign var="isColissimoWsFreeShipping" value=1}{/if} />
                                     {/loop}
                                 </div>
-
                                 {/form_field}
-                            </form>
-
-                            {/form}
-                        </div>
+                            </div>
+                            <div class="col-md-6" id="freeshipping-from" {if $isColissimoWsFreeShipping eq 1} style="display:none;" {/if}>
+                                <div class="input-group">
+                                    <span class="input-group-addon">{intl l="Or activate free shipping from (€) :" d="colissimows.bo.default"}</span>
+                                    {form_field form=$form field="freeshipping_from"}
+                                        {loop type="colissimows.freeshipping" name="freeshipping_colissimows"}
+                                            <input type="number" name="{$name}"  class="form-control" value="{$value}" step="0.01">
+                                        {/loop}
+                                    {/form_field}
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default" type="submit">{intl l="Save"}</button>
+                                    </span>
+                                </div>
+                            </div>
+                        </form>
+                        {/form}
                     </div>
 
                     <br>
@@ -343,6 +142,31 @@
                                             <label class="clearfix">
                                                 <small>{intl d='colissimows.bo.default' l="Area : "}</small> {$NAME}
                                             </label>
+                                        </th>
+
+                                        <th width="40%">
+                                            <div id="area-freeshipping-{$area_id}" {if $isColissimoWsFreeShipping eq 1}  style="display:none;" {/if}>
+                                            <form action="{url path="/admin/module/colissimows/area_freeshipping"}"  method="post">
+                                                <div class="input-group">
+                                                    <span class="input-group-addon {if $area_id }alert-success{/if}">{intl l="Activate free shipping from (€) :" d="colissimows.bo.default"}</span>
+                                                    <input type="hidden" name="area-id" value="{$area_id}">
+                                                    <input type="hidden" name="delivery-mode" value="{$deliveryModeId}">
+
+                                                    {ifloop rel="area_freeshipping"}
+                                                        {loop type="colissimows.area.freeshipping" name="area_freeshipping" area_id=$area_id}
+                                                        <input type="number" step="0.01" name="cart-amount" class="form-control" value="{$CART_AMOUNT}">
+                                                        {/loop}
+                                                    {/ifloop}
+                                                        {elseloop rel="area_freeshipping"}
+                                                        <input type="number" step="0.01" name="cart-amount" class="form-control" value="">
+                                                    {/elseloop}
+
+                                                    <span class="input-group-btn">
+                                                        <button class="btn btn-default" type="submit">{intl l="Save"}</button>
+                                                    </span>
+                                                </div>
+                                            </form>
+                                            </div>
                                         </th>
                                     </tr>
                                     </thead>
@@ -460,7 +284,3 @@
         </div>
     </div>
 </div>
-{* Download zip file if we have the name in the URL parameters *}
-{if $smarty.get.zip}
-<iframe style="width:100%;height:20px;border:none" src="{url path="/admin/module/colissimows/labels-zip/%hash" hash={$smarty.get.zip}}"></iframe>
-{/if}

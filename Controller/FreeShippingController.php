@@ -24,6 +24,7 @@
 namespace ColissimoWs\Controller;
 
 use ColissimoWs\Form\FreeShippingForm;
+use ColissimoWs\Model\ColissimowsAreaFreeshippingQuery;
 use ColissimoWs\Model\ColissimowsFreeshipping;
 use ColissimoWs\Model\ColissimowsFreeshippingQuery;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -31,6 +32,8 @@ use Thelia\Controller\Admin\BaseAdminController;
 
 use Thelia\Core\Security\Resource\AdminResources;
 use Thelia\Core\Security\AccessManager;
+use Thelia\Model\AreaQuery;
+use Thelia\Tools\URL;
 
 class FreeShippingController extends BaseAdminController
 {
@@ -42,24 +45,67 @@ class FreeShippingController extends BaseAdminController
         }
 
         $form = new FreeShippingForm($this->getRequest());
-        $response=null;
+        $response = null;
 
         try {
             $vform = $this->validateForm($form);
             $freeshipping = $vform->get('freeshipping')->getData();
+            $freeshippingFrom = $vform->get('freeshipping_from')->getData();
 
             if (null === $isFreeShippingActive = ColissimowsFreeshippingQuery::create()->findOneById(1)){
                 $isFreeShippingActive = new ColissimowsFreeshipping();
             }
 
-            $isFreeShippingActive->setActive($freeshipping);
-
+            $isFreeShippingActive
+                ->setActive($freeshipping)
+                ->setFreeshippingFrom($freeshippingFrom)
+            ;
             $isFreeShippingActive->save();
 
-            $response = JsonResponse::create(array("success"=>"Freeshipping activated"), 200);
+            $response = $this->generateRedirect(URL::getInstance()->absoluteUrl("/admin/module/ColissimoWs"));
         } catch (\Exception $e) {
-            $response = JsonResponse::create(array("error"=>$e->getMessage()), 500);
         }
         return $response;
     }
+
+    /**
+     * @return mixed|\Symfony\Component\HttpFoundation\Response|null
+     */
+    public function setAreaFreeShipping()
+    {
+        if (null !== $response = $this
+                ->checkAuth(array(AdminResources::MODULE), array('ColissimoWs'), AccessManager::UPDATE)) {
+            return $response;
+        }
+
+        try {
+            $data = $this->getRequest()->request;
+
+            $colissimows_area_id = $data->get('area-id');
+            $cartAmount = $data->get('cart-amount');
+
+            if ($cartAmount < 0 || $cartAmount === '') {
+                $cartAmount = null;
+            }
+
+            $areaQuery = AreaQuery::create()->findOneById($colissimows_area_id);
+            if (null === $areaQuery) {
+                return null;
+            }
+
+            $colissimowsAreaFreeshippingQuery = ColissimowsAreaFreeshippingQuery::create()
+                ->filterByAreaId($colissimows_area_id)
+                ->findOneOrCreate();
+
+            $colissimowsAreaFreeshippingQuery
+                ->setAreaId($colissimows_area_id)
+                ->setCartAmount($cartAmount)
+                ->save();
+
+        } catch (\Exception $e) {
+        }
+
+        return $this->generateRedirect(URL::getInstance()->absoluteUrl('/admin/module/ColissimoWs'));
+    }
+
 }
