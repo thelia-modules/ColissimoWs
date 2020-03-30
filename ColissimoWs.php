@@ -58,10 +58,26 @@ class ColissimoWs extends AbstractDeliveryModule
         } catch (\Exception $ex) {
             $database = new Database($con->getWrappedConnection());
             $database->insertSql(null, [__DIR__ . "/Config/thelia.sql"]);
+        }
 
-            if (!self::getConfigValue(self::AFFRANCHISSEMENT_ENDPOINT_URL)) {
-                self::setConfigValue(self::AFFRANCHISSEMENT_ENDPOINT_URL, 'https://ws.colissimo.fr/sls-ws/SlsServiceWS?wsdl');
-            }
+        if (!ColissimowsFreeshippingQuery::create()->filterById(1)->findOne()) {
+            ColissimowsFreeshippingQuery::create()->filterById(1)->findOneOrCreate()->setActive(0)->save();
+        }
+
+        if (!self::getConfigValue(self::AFFRANCHISSEMENT_ENDPOINT_URL)) {
+            self::setConfigValue(self::AFFRANCHISSEMENT_ENDPOINT_URL, 'https://ws.colissimo.fr/sls-ws/SlsServiceWS?wsdl');
+        }
+
+        if (!self::getConfigValue(self::COLISSIMO_USERNAME)) {
+            self::setConfigValue(self::COLISSIMO_USERNAME, ' ');
+        }
+
+        if (!self::getConfigValue(self::COLISSIMO_PASSWORD)) {
+            self::setConfigValue(self::COLISSIMO_PASSWORD, ' ');
+        }
+
+        if (!self::getConfigValue(self::ACTIVATE_DETAILED_DEBUG)) {
+            self::setConfigValue(self::ACTIVATE_DETAILED_DEBUG, '0');
         }
 
         if (null === MessageQuery::create()->findOneByName(self::CONFIRMATION_MESSAGE_NAME)) {

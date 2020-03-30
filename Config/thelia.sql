@@ -17,7 +17,7 @@ CREATE TABLE `colissimows_price_slices`
     `max_price` FLOAT,
     `shipping` FLOAT NOT NULL,
     PRIMARY KEY (`id`),
-    INDEX `FI_colissimows_price_slices_area_id` (`area_id`),
+    INDEX `fi_colissimows_price_slices_area_id` (`area_id`),
     CONSTRAINT `fk_colissimows_price_slices_area_id`
         FOREIGN KEY (`area_id`)
         REFERENCES `area` (`id`)
@@ -51,7 +51,7 @@ CREATE TABLE `colissimows_area_freeshipping`
     `area_id` INTEGER NOT NULL,
     `cart_amount` DECIMAL(18,2) DEFAULT 0.00,
     PRIMARY KEY (`id`),
-    INDEX `FI_colissimows_area_freeshipping_area_id` (`area_id`),
+    INDEX `fi_colissimows_area_freeshipping_area_id` (`area_id`),
     CONSTRAINT `fk_colissimows_area_freeshipping_area_id`
         FOREIGN KEY (`area_id`)
         REFERENCES `area` (`id`)
@@ -81,7 +81,7 @@ CREATE TABLE `colissimows_label`
     `created_at` DATETIME,
     `updated_at` DATETIME,
     PRIMARY KEY (`id`),
-    INDEX `FI_colissimows_label_order` (`order_id`),
+    INDEX `fi_colissimows_label_order` (`order_id`),
     CONSTRAINT `fk_colissimows_label_order`
         FOREIGN KEY (`order_id`)
         REFERENCES `order` (`id`)
