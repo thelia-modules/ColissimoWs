@@ -45,18 +45,6 @@ class HookManager extends BaseHook
         );
     }
 
-    public function onMainTopMenuTools(HookRenderBlockEvent $event)
-    {
-        $event->add(
-            [
-                'id' => 'tools_menu_colissimows',
-                'class' => '',
-                'url' => URL::getInstance()->absoluteUrl('/admin/module/ColissimoWs'),
-                'title' => $this->translator->trans("Colissimo labels (%num)", [ '%num' => ColissimowsLabelQuery::create()->count() ], ColissimoWs::DOMAIN_NAME)
-            ]
-        );
-    }
-
     public function onModuleConfigJs(HookRenderEvent $event)
     {
         $event->add($this->render('colissimows/module-config-js.html'));

@@ -57,7 +57,7 @@ class ConfigurationController extends BaseAdminController
             );
 
             // Redirect to the success URL,
-            if (!$this->getRequest()->get('save_mode') == 'stay') {
+            if (! $this->getRequest()->get('save_mode') == 'stay') {
                 $url = '/admin/modules';
             }
         } catch (FormValidationException $ex) {

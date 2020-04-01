@@ -4,6 +4,7 @@ namespace ColissimoWs\Model;
 
 use ColissimoWs\Model\Base\ColissimowsLabelQuery as BaseColissimowsLabelQuery;
 
+
 /**
  * Skeleton subclass for performing query and update operations on the 'colissimows_label' table.
  *
@@ -17,4 +18,4 @@ use ColissimoWs\Model\Base\ColissimowsLabelQuery as BaseColissimowsLabelQuery;
 class ColissimowsLabelQuery extends BaseColissimowsLabelQuery
 {
 
-}
+} // ColissimowsLabelQuery

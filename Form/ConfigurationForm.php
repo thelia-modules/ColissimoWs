@@ -57,7 +57,8 @@ class ConfigurationForm extends BaseForm
                         )
                     ]
                 ]
-            )->add(
+            )
+            ->add(
                 ColissimoWs::AFFRANCHISSEMENT_ENDPOINT_URL,
                 'url',
                 [
@@ -73,31 +74,8 @@ class ConfigurationForm extends BaseForm
                         )
                     ]
                 ]
-            )->add(
-                ColissimoWs::FORMAT_ETIQUETTE,
-                'choice',
-                [
-                    'constraints' => [
-                        new NotBlank(),
-                    ],
-                    'choices' => [
-                        'PDF_A4_300dpi'    => 'Bureautique PDF, A4, résolution 300dpi',
-                        'PDF_10x15_300dpi' => 'Bureautique PDF, 10cm par 15cm, résolution 300dpi',
-                        'ZPL_10x15_203dpi' => 'Thermique en ZPL, de dimension 10cm par 15cm, et de résolution 203dpi',
-                        'ZPL_10x15_300dpi' => 'Thermique ZPL, 10cm par 15cm, résolution 300dpi',
-                        'DPL_10x15_203dpi' => 'Thermique DPL, 10cm par 15cm, résolution 203dpi',
-                        'DPL_10x15_300dpi' => 'Thermique DPL, 10cm par 15cm, résolution 300dpi',
-                    ],
-                    'label'       => $this->translator->trans('Format des étiquettes', [], ColissimoWs::DOMAIN_NAME),
-                    'label_attr'  => [
-                        'help' => $this->translator->trans(
-                            'Indiquez le format des étiquettes à générer, en fonction de l\'imprimante dont vous disposez.',
-                            [],
-                            ColissimoWs::DOMAIN_NAME
-                        )
-                    ]
-                ]
-            )->add(
+            )
+            ->add(
                 ColissimoWs::ACTIVATE_DETAILED_DEBUG,
                 'checkbox',
                 [
@@ -110,71 +88,6 @@ class ConfigurationForm extends BaseForm
                             ColissimoWs::DOMAIN_NAME
                         )
                     ]
-                ]
-            )
-            ->add(
-                ColissimoWs::FROM_NAME,
-                'text',
-                [
-                    'constraints' => [
-                        new NotBlank(),
-                    ],
-                    'label'       => $this->translator->trans('Nom de société', [], ColissimoWs::DOMAIN_NAME),
-                ]
-            )
-            ->add(
-                ColissimoWs::FROM_ADDRESS_1,
-                'text',
-                [
-                    'constraints' => [ new NotBlank() ],
-                    'label' => $this->translator->trans('Adresse', [], ColissimoWs::DOMAIN_NAME)
-                ]
-            )
-            ->add(
-                ColissimoWs::FROM_ADDRESS_2,
-                'text',
-                [
-                    'constraints' => [ ],
-                    'required' => false,
-                    'label'  => $this->translator->trans('Adresse (suite)', [], ColissimoWs::DOMAIN_NAME)
-                ]
-            )
-            ->add(
-                ColissimoWs::FROM_CITY,
-                'text',
-                [
-                    'constraints' => [ new NotBlank() ],
-                    'label'  => $this->translator->trans('Ville', [], ColissimoWs::DOMAIN_NAME)
-                ]
-            )
-            ->add(
-                ColissimoWs::FROM_ZIPCODE,
-                'text',
-                [
-                    'constraints' => [ new NotBlank() ],
-                    'label'  => $this->translator->trans('Code postal', [], ColissimoWs::DOMAIN_NAME)
-                ]
-            )
-            ->add(
-                ColissimoWs::FROM_COUNTRY,
-                'text',
-                [
-                    'constraints' => [ new NotBlank() ],
-                    'label'  => $this->translator->trans('Pays', [], ColissimoWs::DOMAIN_NAME)
-                ]
-            )->add(
-                ColissimoWs::FROM_CONTACT_EMAIL,
-                'email',
-                [
-                    'constraints' => [ new NotBlank() ],
-                    'label'  => $this->translator->trans('Adresse e-mail de contact pour les expéditions', [], ColissimoWs::DOMAIN_NAME)
-                ]
-            )->add(
-                ColissimoWs::FROM_PHONE,
-                'text',
-                [
-                    'constraints' => [ new NotBlank() ],
-                    'label'  => $this->translator->trans('Téléphone', [], ColissimoWs::DOMAIN_NAME)
                 ]
             )
         ;

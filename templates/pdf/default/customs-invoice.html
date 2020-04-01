@@ -33,7 +33,7 @@
 {if not $store_description}{assign var="store_description" value={$store_name}}{/if}
 
 {* Set the default translation domain, that will be used by {intl} when the 'd' parameter is not set *}
-{default_translation_domain domain='colissimows.bo.default'}
+{default_translation_domain domain='pdf.mfk'}
 
 {* Declare assets directory, relative to template base directory *}
 {declare_assets directory='assets'}
@@ -321,6 +321,42 @@
         </tr>
         {/loop}
 
+        {loop type="mfk.selection.order" name="cadeaux_et_message_cadeau" order_id=$order_id}
+        {if ! empty($ECHANTILLON_1) || ! empty($ECHANTILLON_2)}
+        {$prixEchantillons = floatval({config key="tarif_echantillons_export"})}
+        <tr class="table-2">
+            <td class="borders" style="line-height:14px;">{intl l="Free samples "}: {$ECHANTILLON_1}
+                , {$ECHANTILLON_2}</td>
+            <td class="borders right">1</td>
+            <td class="borders right">{format_money number=$prixEchantillons}</td>
+            <td class="borders right">{format_money number=$prixEchantillons}</td>
+            <td class="borders right"></td>
+            <td class="borders">France</td>
+            <td class="borders">&nbsp;</td>
+
+            {$totalValue = $totalValue + $prixEchantillons}
+            {$itemCount = $itemCount + 1}
+        </tr>
+        {/if}
+
+        {if ! empty($CADEAU)}
+        {$prixCadeau = floatval({config key="tarif_cadeau_export"})}
+        <tr class="table-2">
+            <td class="borders" style="line-height:14px;">{intl l="Your gift "}: {$CADEAU}</td>
+            <td class="borders right">1</td>
+            <td class="borders right">{format_money number=$prixCadeau}</td>
+            <td class="borders right">{format_money number=$prixCadeau}</td>
+            <td class="borders right"></td>
+            <td class="borders">France</td>
+            <td class="borders">&nbsp;</td>
+
+            {* A changer si besoin *}
+            {$totalValue = $totalValue + $prixCadeau}
+            {$itemCount = $itemCount + 1}
+        </tr>
+        {/if}
+
+        {/loop}
     </table>
 
     {if $POSTAGE_TAX_RULE_TITLE}
@@ -351,12 +387,12 @@
         <tr>
             <td>
                 <p>Type of Export: permanent</p>
-                <p>Reason for Export:</p>
+                <p>Reason for Export</p>
             </td>
             <td>
-                <p>Currency Code: {$orderCurrency}</p>
-                <p>Terms of Trade: DAP</p>
-                <p>City Name of liability:</p>
+                <p>Currency Code :{$orderCurrency}</p>
+                <p>Terms of Trade : DAP</p>
+                <p>City Name of liability</p>
             </td>
         </tr>
     </table>
@@ -367,7 +403,7 @@
         <col style="width: 50%; padding: 2mm;"/>
         <tr>
             <td>
-                <p>Signature: {intl l=""}</p>
+                <p>Signature: {intl l="Sender's name"}</p>
                 <p>Airwaybill Number:</p>
             </td>
             <td>

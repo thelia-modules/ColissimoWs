@@ -8,34 +8,14 @@
         <default key="_controller">ColissimoWs\Controller\ConfigurationController::configure</default>
     </route>
 
-    <route id="colissimows.export" path="/admin/module/colissimows/export">
-        <default key="_controller">ColissimoWs\Controller\LabelController::export</default>
-    </route>
-
-    <route id="colissimows.label" path="/admin/module/colissimows/label/{orderId}">
-        <default key="_controller">ColissimoWs\Controller\LabelController::getLabel</default>
-        <requirement key="orderId">\d+</requirement>
-    </route>
-
-    <route id="colissimows.customs-invoice" path="/admin/module/colissimows/customs-invoice/{orderId}">
-        <default key="_controller">ColissimoWs\Controller\LabelController::getCustomsInvoice</default>
-        <requirement key="orderId">\d+</requirement>
-    </route>
-
-    <route id="colissimows.clear_label" path="/admin/module/colissimows/label/clear/{orderId}">
-        <default key="_controller">ColissimoWs\Controller\LabelController::clearLabel</default>
-        <requirement key="orderId">\d+</requirement>
-    </route>
-
-    <route id="colissimows.get_zip" path="/admin/module/colissimows/labels-zip/{base64EncodedZipFilename}">
-        <default key="_controller">ColissimoWs\Controller\LabelController::getLabelZip</default>
-        <requirement key="base64ZipFilePath">[A-Za-z0-9]+</requirement>
-    </route>
-
     <!-- Price Slices -->
 
     <route id="colissimows.toggle.freeshipping" path="/admin/module/colissimows/freeshipping" methods="post">
         <default key="_controller">ColissimoWs\Controller\FreeShippingController::toggleFreeShippingActivation</default>
+    </route>
+
+    <route id="colissimows.edit.areafreeshipping" path="/admin/module/colissimows/area_freeshipping" methods="post">
+        <default key="_controller">ColissimoWs\Controller\FreeShippingController::setAreaFreeShipping</default>
     </route>
 
     <route id="colissimows.add.price-slice" path="/admin/module/colissimows/price-slice/save" methods="post">
@@ -45,6 +25,5 @@
     <route id="colissimows.update.price-slice" path="/admin/module/colissimows/price-slice/delete" methods="post">
         <default key="_controller">ColissimoWs\Controller\PriceSliceController::deletePriceSliceAction</default>
     </route>
-
 
 </routes>

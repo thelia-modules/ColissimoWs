@@ -44,11 +44,10 @@ class PriceSlicesLoop extends BaseLoop implements PropelSearchLoopInterface
         foreach ($loopResult->getResultDataCollection() as $priceSlice) {
             $loopResultRow = new LoopResultRow($priceSlice);
             $loopResultRow
-                ->set("SLICE_ID", $priceSlice->getId())
-                ->set("MAX_WEIGHT", $priceSlice->getMaxWeight())
-                ->set("MAX_PRICE", $priceSlice->getMaxPrice())
-                ->set("SHIPPING", $priceSlice->getShipping())
-                ->set("FRANCO", $priceSlice->getFrancoMinPrice())
+                ->set('SLICE_ID', $priceSlice->getId())
+                ->set('MAX_WEIGHT', $priceSlice->getMaxWeight())
+                ->set('MAX_PRICE', $priceSlice->getMaxPrice())
+                ->set('SHIPPING', $priceSlice->getShipping())
             ;
             $loopResult->addRow($loopResultRow);
         }

@@ -4,6 +4,7 @@ namespace ColissimoWs\Model;
 
 use ColissimoWs\Model\Base\ColissimowsFreeshippingQuery as BaseColissimowsFreeshippingQuery;
 
+
 /**
  * Skeleton subclass for performing query and update operations on the 'colissimows_freeshipping' table.
  *
@@ -17,4 +18,4 @@ use ColissimoWs\Model\Base\ColissimowsFreeshippingQuery as BaseColissimowsFreesh
 class ColissimowsFreeshippingQuery extends BaseColissimowsFreeshippingQuery
 {
 
-}
+} // ColissimowsFreeshippingQuery
