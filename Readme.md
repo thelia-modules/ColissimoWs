@@ -26,5 +26,5 @@ Si vous utilisez la facture par défaut, pensez-bien à faire les "traductions" 
 Add it in your main Thelia composer.json file
 
 ```
-composer require thelia/process-and-invoice-module:~1.0.0
+composer require thelia/thelia/colissimows-module:~1.0.0
 ```
